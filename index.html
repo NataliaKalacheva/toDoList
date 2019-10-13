@@ -10,9 +10,20 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="styles.css" />
     <title>Todo List</title>
   </head>
   <body>
+    <nav class="header navbar navbar-dark bg-primary pl-5 pr-5">
+      <a class="navbar-brand">Task list</a>
+      <form class="form-inline">
+        <select class="form-control form-control-sm" id="themeSelect">
+          <option value="default">Theme Default</option>
+          <option value="light">Theme Light</option>
+          <option value="dark">Theme Dark</option>
+        </select>
+      </form>
+    </nav>
     <div class="form-section mt-5">
       <div class="container">
         <div class="row">
@@ -47,8 +58,21 @@
     </div>
     <div class="tasks-list-section mt-5">
       <div class="container">
-        <ul class="list-group">
-          <!-- <li class="list-group-item d-flex align-items-center flex-wrap mt-2">
+        <div class="btn-group">
+          <button class="btn btn-warning btn-sm ml-auto allTasks-btn">
+            All tasks
+          </button>
+          <button class="btn btn-warning btn-sm ml-auto activeTasks-btn">
+            Active tasks
+          </button>
+        </div>
+        <ul class="list-group mb-5"></ul>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
+<!-- <li class="list-group-item d-flex align-items-center flex-wrap mt-2">
             <span>My title</span>
             <button class="btn btn-danger ml-auto delete-btn">Delete</button>
             <p class="mt-2 w-100">
@@ -58,9 +82,3 @@
               dignissimos.
             </p>
           </li> -->
-        </ul>
-      </div>
-    </div>
-    <script src="app.js"></script>
-  </body>
-</html>
