@@ -134,7 +134,9 @@ const tasks = [
       "--input-focus-box-shadow": "0 0 0 0.2rem rgba(141, 143, 146, 0.25)"
     }
   };
-  let lastSelectedTheme = "default";
+  let lastSelectedTheme = localStorage.getItem("app_theme") || "default"; // последняя тема сохраненная при перезагрузке
+
+  console.log(lastSelectedTheme);
 
   // Elements UI
   const listContainer = document.querySelector(
@@ -165,6 +167,7 @@ const tasks = [
   }
 
   // Events
+  setTheme(lastSelectedTheme);
   renderAllTasks(objOfTasks);
   form.addEventListener("submit", onFormSubmitHandler); //вешаем на форму событие сабмита
   listContainer.addEventListener("click", onDeleteHandler);
@@ -411,6 +414,7 @@ const tasks = [
     }
     setTheme(selectedTheme);
     lastSelectedTheme = selectedTheme;
+    localStorage.setItem("app_theme", selectedTheme);
   }
   function setTheme(name) {
     const setectedThemObj = themes[name];
