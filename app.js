@@ -1,45 +1,41 @@
 const tasks = [
-  {
-    _id: "5d2ca9e29c8a94095c1288e0",
-    completed: false,
-    body: "Some task..\r\n",
-    title: "Task title 1."
-  },
-  {
-    _id: "5d2ca9e2e03d40b3232496aa7",
-    completed: true,
-    body: "Some task.",
-    title: "Task title 2."
-  },
-  {
-    _id: "5d2ca9e29c8a94095564788e0",
-    completed: false,
-    body: "Some task.\r\n",
-    title: "Task title 3."
-  },
-  {
-    _id: "5d2ca9e2e03d40b326596aa7", //уникальный id
-    completed: true, //завершена ли задача
-    body: "Some task.\r\n", //текст
-    title: "Task title 4." //заголовок
-  }
+  // {
+  //   _id: "5d2ca9e29c8a94095c1288e0",
+  //   completed: false,
+  //   body: "Some task..\r\n",
+  //   title: "Task title 1."
+  // },
+  // {
+  //   _id: "5d2ca9e2e03d40b3232496aa7",
+  //   completed: true,
+  //   body: "Some task.",
+  //   title: "Task title 2."
+  // },
+  // {
+  //   _id: "5d2ca9e29c8a94095564788e0",
+  //   completed: false,
+  //   body: "Some task.\r\n",
+  //   title: "Task title 3."
+  // }
+
 ];
 
-// Чтобы добавить новую задачу при запонении формы нам нужно:
-// 1) Найти форму
-// 2) Обработать введенные данные
-// 3) При сабмите закинуть данные в объект
-// 4) Добавить задачу вверх разметки
-
-//Добавляем все задачи из объекта в разметку
-
 (function(arrOfTasks) {
-  // самовызывающаяся функция, чтобы закрыть переменные от глобальной области видимости
-  const objOfTasks = arrOfTasks.reduce((acc, task) => {
-    //Получаем из массива объектов, объект объектов,
-    acc[task._id] = task; //где ключ - id элемента массива, а значение весь объект
+
+  let objOfTasks = arrOfTasks.reduce((acc, task) => {
+
+    acc[task._id] = task;
     return acc;
   }, {});
+
+  for (i=0; i<localStorage.length; i++) {
+    let key = localStorage.key(i);
+    if (key.includes("task-0")) {
+      let task = JSON.parse(localStorage.getItem(key));
+      let id = task._id;
+      objOfTasks[id] = task;
+    }
+  }
 
   const themes = {
     default: {
@@ -134,42 +130,29 @@ const tasks = [
       "--input-focus-box-shadow": "0 0 0 0.2rem rgba(141, 143, 146, 0.25)"
     }
   };
-  let lastSelectedTheme = localStorage.getItem("app_theme") || "default"; // последняя тема сохраненная при перезагрузке
 
-  console.log(lastSelectedTheme);
+
+  let lastSelectedTheme = localStorage.getItem("app_theme") || "default";
+
 
   // Elements UI
   const listContainer = document.querySelector(
     ".tasks-list-section .list-group"
   );
-  const form = document.forms["addTask"]; //document.forms - хранит коллекцию всех форм на странице и получаем доступ по значению атрибута name
+  const form = document.forms["addTask"];
   const inputTitle = form.elements["title"];
-  const inputBody = form.elements["body"]; //получаем доступ по имени или айди
+  const inputBody = form.elements["body"];
   const btnGroup = document.querySelector(".btn-group");
   const allTasksBtn = document.querySelector(".allTasks-btn");
   const activeTasksBtn = document.querySelector(".activeTasks-btn");
   const themeSelect = document.getElementById("themeSelect");
 
-  if (tasks.length === 0) {
-    // Проверяем, есть ли задачи
-    noTasks();
-  }
-
-  function noTasks() {
-    let p = document.createElement("p");
-    p.textContent = "На сегодня задач еще нет";
-    p.align = "center";
-    p.classList.add("mt-5", "ml-auto", "no-tasks");
-    document.querySelector(".form-section.mt-5").appendChild(p);
-    if (btnGroup) {
-      btnGroup.remove();
-    }
-  }
 
   // Events
+
   setTheme(lastSelectedTheme);
   renderAllTasks(objOfTasks);
-  form.addEventListener("submit", onFormSubmitHandler); //вешаем на форму событие сабмита
+  form.addEventListener("submit", onFormSubmitHandler);
   listContainer.addEventListener("click", onDeleteHandler);
   listContainer.addEventListener("click", onCompleteHandler);
   listContainer.addEventListener("click", onEditHandler);
@@ -177,29 +160,35 @@ const tasks = [
   activeTasksBtn.addEventListener("click", onActiveTaskHandler);
   themeSelect.addEventListener("change", onThemeSelectHandler);
 
-  //отрисовываем все задачи
+
+
+
   function renderAllTasks(tasksList) {
+
     if (!tasksList) {
-      // если задач нет, то прерываем выполнение функции
       console.error("Передайте список задач!");
       return;
     }
 
-    const fragment = document.createDocumentFragment(); //создаем фрагмент будущего списка
+     if (Object.keys(tasksList).length === 0) {
+        noTasks();
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
 
     Object.values(tasksList).forEach(task => {
-      //Перебираем все задачи
+
       const li = listItemTemplate(task);
       completeTaskInHTML(task.completed, li);
       fragment.appendChild(li);
-      //Возвращаем DOM объект одного элемента задачи
+
     });
-    listContainer.appendChild(fragment); //Добавляем весь фрагмент на страницу
+    listContainer.appendChild(fragment);
   }
-  // создаем один элемент LI на переданном объекте
+
   function listItemTemplate({ _id, title, body } = {}) {
-    //генерируем разметку одного элемента списка
-    //сразу деструкторизировали получаемый в качестве аргумента объект
+
     const li = document.createElement("li");
 
     li.classList.add(
@@ -209,10 +198,10 @@ const tasks = [
       "flex-wrap",
       "mt-2"
     );
-    li.setAttribute("data-task-id", _id); // добавляем элементу айдишник в атрибут
+    li.setAttribute("data-task-id", _id);
 
     const span = document.createElement("span");
-    span.textContent = title; //задаем title из объекта
+    span.textContent = title;
     span.style.fontWeight = "bold";
     span.classList.add("p-2");
 
@@ -238,43 +227,54 @@ const tasks = [
     li.appendChild(editBtn);
     li.appendChild(completeBtn);
 
-    return li; //возвращаем один наполненный li
+    return li;
   }
 
-  //событие сабмита, читаем данные пользователя
-  function onFormSubmitHandler(event) {
-    event.preventDefault(); //Прекращаем стандартную отправку формы
-    const titleValue = inputTitle.value; // в value хранится текущее значение, которое записано в этом inputе
-    const bodyValue = inputBody.value;
 
-    //проверка, что данные не пустые
+  function noTasks() {
+    let p = document.createElement("p");
+    p.textContent = "На сегодня задач еще нет";
+    p.align = "center";
+    p.classList.add("mt-5", "ml-auto", "no-tasks");
+    document.querySelector(".form-section.mt-5").appendChild(p);
+    if (btnGroup) {
+      btnGroup.remove();
+    }
+  }
+
+  function onFormSubmitHandler(event) {
+    event.preventDefault();
+    const titleValue = inputTitle.value;
+    const bodyValue = inputBody.value;
 
     if (!titleValue || !bodyValue) {
       alert("Пожалуйста введите title и body");
       return;
     }
 
-    const task = createNewTask(titleValue, bodyValue); //передаем введенные данные в функцию по созданию новой задачи
-    const listItem = listItemTemplate(task); // получаем новый DOM элемент
+    const task = createNewTask(titleValue, bodyValue);
+    const listItem = listItemTemplate(task);
 
-    listContainer.insertAdjacentElement("afterbegin", listItem); //вставляем узел в начало списка
-    form.reset(); //сбрасываем состояние формы до начального
+    listContainer.insertAdjacentElement("afterbegin", listItem);
+    form.reset();
     if (listContainer.children.length === 1) {
       document.querySelector(".no-tasks").remove();
       listContainer.insertAdjacentElement("beforebegin", btnGroup);
     }
   }
-  //функция создает новую задачу
+
   function createNewTask(title, body) {
     const newTask = {
-      title, //cпособ объявления одноименных св-в в объекте
+      title,
       body,
       completed: false,
       _id: `task-${Math.random()}`
     };
 
     objOfTasks[newTask._id] = newTask;
-    return { ...newTask }; //поверхностное копирование нового объекта
+
+    localStorage.setItem(newTask._id, JSON.stringify(newTask));
+    return { ...newTask };
   }
 
   //Удалить задачу
@@ -282,26 +282,26 @@ const tasks = [
     const title = objOfTasks[id].title;
     const isConfirm = confirm(
       `Вы уверены, что хотите удалить эту задачу: ${title}?`
-    ); //подтверждение удаления задачи
-
-    if (!isConfirm) return isConfirm; //возвращаем false
+    );
+    if (!isConfirm) return isConfirm;
     delete objOfTasks[id];
+    localStorage.removeItem(id);
 
     return isConfirm;
   }
 
   function deleteTaskFromHTML(confirmed, el) {
-    //убираем в отдельную функцию, т.к. приложение может усложняться
+
     if (!confirmed) return;
     el.remove();
   }
 
-  //Мы не можем повесить обработчик на кнопку, т.к. блоки генерируются динамически, с помощью JS. Нам поможет делегирование событие на родителя, и проверка на таргет.
+
   function onDeleteHandler({ target }) {
-    //деструктурировали объект event(event.target)
+
     if (target.classList.contains("delete-btn")) {
-      const parent = target.closest("[data-task-id]"); //ищем ближайший атрибут с айдишником
-      const id = parent.dataset.taskId; //получили id
+      const parent = target.closest("[data-task-id]");
+      const id = parent.dataset.taskId;
       const confirmed = deleteTask(id);
       deleteTaskFromHTML(confirmed, parent);
 
@@ -311,7 +311,7 @@ const tasks = [
     }
   }
 
-  //Редактировать задачу
+
   function onEditHandler({ target }) {
     if (target.classList.contains("edit-btn")) {
       const parent = target.closest("[data-task-id]");
@@ -346,7 +346,7 @@ const tasks = [
     });
   }
 
-  //Завершить задачу
+
   function completeTask(id) {
     const title = objOfTasks[id].title;
     const isConfirm = confirm(`Задача ${title} выполнена!`);
@@ -374,7 +374,7 @@ const tasks = [
   }
   function restoreTask(id) {
     objOfTasks[id].completed = false;
-    console.log(objOfTasks[id]);
+
   }
 
   function restoreTaskInHtml(el, restoreBtn, completeBtn) {
@@ -416,6 +416,7 @@ const tasks = [
     lastSelectedTheme = selectedTheme;
     localStorage.setItem("app_theme", selectedTheme);
   }
+
   function setTheme(name) {
     const setectedThemObj = themes[name];
     Object.entries(setectedThemObj).forEach(([key, value]) => {
